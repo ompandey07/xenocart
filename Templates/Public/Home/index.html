@@ -1,0 +1,891 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XenoCart</title>
+
+    <link rel="shortcut icon" href="{% static 'Logo/FavIcon.png' %}" type="image/x-icon">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F43F5E',
+                        neutral: '#F5F5F5',
+                        'neutral-dark': '#374151',
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* YouTube-style top preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #f5f5f5;
+            z-index: 9999;
+        }
+        
+        #preloader-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #3B82F6, #10B981, #F43F5E);
+            transition: width 0.3s ease;
+        }
+        
+        /* Custom animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .anim-fade-in-down {
+            animation: fadeInDown 0.5s ease forwards;
+        }
+        
+        .anim-slide-in {
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        /* Hide content during load */
+        .content-hidden {
+            opacity: 0;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3B82F6;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563EB;
+        }
+    </style>
+</head>
+<body class="font-sans bg-white text-neutral-dark overflow-x-hidden">
+    <!-- Preloader -->
+    <div id="preloader">
+        <div id="preloader-bar"></div>
+    </div>
+
+    <!-- Announcement Bar -->
+    <div class="bg-primary text-white py-2 px-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-6 text-sm">
+                <div class="flex items-center gap-1">
+                    <i class="ri-truck-line"></i>
+                    <span>Free shipping on orders over $50</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1">
+                    <i class="ri-time-line"></i>
+                    <span>30-day money-back guarantee</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1">
+                    <i class="ri-customer-service-line"></i>
+                    <span>24/7 Customer Support</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-1 cursor-pointer hover:text-gray-200">
+                    <i class="ri-map-pin-line"></i>
+                    <span>Store Locator</span>
+                </div>
+                <div class="flex items-center gap-1 cursor-pointer hover:text-gray-200">
+                    <i class="ri-customer-service-2-line"></i>
+                    <span>Help</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-4 sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="{% static 'Logo/Logo.png' %}" alt="XenoCart Logo" class="h-10 w-10">
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">XenoCart</h1>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="hidden md:block w-2/5 relative">
+                    <input type="text" placeholder="Search for products, brands, categories..." class="w-full py-2 px-4 pl-10 rounded-full border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                </div>
+                
+                <!-- Navigation Icons -->
+                <div class="flex items-center space-x-5">
+                    <a href="{% url "login" %}" class="text-neutral-dark hover:text-primary transition relative">
+                        <i class="ri-user-line text-xl"></i>
+                        <span class="sr-only">Account</span>
+                    </a>
+                    <a href="#" class="text-neutral-dark hover:text-primary transition relative">
+                        <i class="ri-heart-line text-xl"></i>
+                        <span class="sr-only">Wishlist</span>
+                        <span class="absolute -top-2 -right-2 bg-accent text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">2</span>
+                    </a>
+                    <a href="#" class="text-neutral-dark hover:text-primary transition relative">
+                        <i class="ri-shopping-cart-line text-xl"></i>
+                        <span class="sr-only">Cart</span>
+                        <span class="absolute -top-2 -right-2 bg-accent text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                    </a>
+                    <button class="md:hidden text-neutral-dark" id="mobile-menu-button">
+                        <i class="ri-menu-line text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="hidden md:flex items-center justify-between mt-4">
+                <ul class="flex items-center space-x-8">
+                    <li><a href="#" class="text-neutral-dark hover:text-primary font-medium transition relative group">
+                        Home
+                        <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a></li>
+                    <li class="relative group">
+                        <a href="#" class="text-neutral-dark hover:text-primary font-medium transition flex items-center gap-1">
+                            Categories
+                            <i class="ri-arrow-down-s-line"></i>
+                        </a>
+                        <div class="absolute left-0 top-full mt-2 w-60 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                            <div class="p-4 grid grid-cols-1 gap-2">
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition">
+                                    <i class="ri-smartphone-line text-primary"></i>
+                                    <span>Electronics</span>
+                                </a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition">
+                                    <i class="ri-t-shirt-line text-primary"></i>
+                                    <span>Fashion</span>
+                                </a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition">
+                                    <i class="ri-home-line text-primary"></i>
+                                    <span>Home & Garden</span>
+                                </a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition">
+                                    <i class="ri-gamepad-line text-primary"></i>
+                                    <span>Toys & Games</span>
+                                </a>
+                                <a href="#" class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition">
+                                    <i class="ri-heart-pulse-line text-primary"></i>
+                                    <span>Health & Beauty</span>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#" class="text-neutral-dark hover:text-primary font-medium transition relative group">
+                        New Arrivals
+                        <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a></li>
+                    <li><a href="#" class="text-neutral-dark hover:text-primary font-medium transition relative group">
+                        Deals
+                        <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a></li>
+                    <li><a href="#" class="text-neutral-dark hover:text-primary font-medium transition relative group">
+                        Brands
+                        <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a></li>
+                </ul>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-neutral-dark hover:text-primary transition flex items-center gap-1">
+                        <i class="ri-coupon-3-line"></i>
+                        <span>Coupons</span>
+                    </a>
+                    <a href="#" class="text-neutral-dark hover:text-primary transition flex items-center gap-1">
+                        <i class="ri-gift-line"></i>
+                        <span>Gift Cards</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- Mobile Search (Visible only on mobile) -->
+            <div class="mt-4 md:hidden relative">
+                <input type="text" placeholder="Search for products..." class="w-full py-2 px-4 pl-10 rounded-full border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Mobile Menu (Hidden by default) -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300">
+        <div class="flex justify-between items-center p-4 border-b">
+            <div class="flex items-center space-x-2">
+                <img src="https://via.placeholder.com/40" alt="XenoCart Logo" class="h-10 w-10">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">XenoCart</h1>
+            </div>
+            <button id="close-mobile-menu">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <ul class="space-y-4">
+                <li><a href="#" class="block py-2 text-lg font-medium">Home</a></li>
+                <li>
+                    <div class="flex justify-between items-center py-2 text-lg font-medium">
+                        <span>Categories</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </div>
+                    <ul class="pl-4 mt-2 space-y-2 hidden">
+                        <li><a href="#" class="block py-1">Electronics</a></li>
+                        <li><a href="#" class="block py-1">Fashion</a></li>
+                        <li><a href="#" class="block py-1">Home & Garden</a></li>
+                        <li><a href="#" class="block py-1">Toys & Games</a></li>
+                        <li><a href="#" class="block py-1">Health & Beauty</a></li>
+                    </ul>
+                </li>
+                <li><a href="#" class="block py-2 text-lg font-medium">New Arrivals</a></li>
+                <li><a href="#" class="block py-2 text-lg font-medium">Deals</a></li>
+                <li><a href="#" class="block py-2 text-lg font-medium">Brands</a></li>
+                <li><a href="#" class="block py-2 text-lg font-medium">Coupons</a></li>
+                <li><a href="#" class="block py-2 text-lg font-medium">Gift Cards</a></li>
+            </ul>
+            
+            <div class="mt-6 space-y-4">
+                <a href="#" class="flex items-center gap-2 py-2">
+                    <i class="ri-user-line text-primary"></i>
+                    <span>My Account</span>
+                </a>
+                <a href="#" class="flex items-center gap-2 py-2">
+                    <i class="ri-heart-line text-primary"></i>
+                    <span>My Wishlist</span>
+                </a>
+                <a href="#" class="flex items-center gap-2 py-2">
+                    <i class="ri-shopping-cart-line text-primary"></i>
+                    <span>My Cart</span>
+                </a>
+                <a href="#" class="flex items-center gap-2 py-2">
+                    <i class="ri-customer-service-line text-primary"></i>
+                    <span>Help Center</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section with Banner Slider -->
+    <section class="relative overflow-hidden content-hidden" id="hero-section">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Main Banner -->
+            <div class="relative rounded-2xl overflow-hidden shadow-lg">
+                <div class="banner-slider relative h-[400px] md:h-[500px]">
+                    <!-- Slide 1 -->
+                    <div class="banner-slide absolute inset-0 opacity-100 transition-opacity duration-700">
+                        <div class="relative w-full h-full">
+                            <img src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80" alt="Latest Tech Products" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-8 md:p-16">
+                                <div class="max-w-lg">
+                                    <span class="inline-block text-white mb-3 text-sm md:text-base font-medium bg-accent px-4 py-1 rounded-full">New Arrivals</span>
+                                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Next-Gen Tech at Your Fingertips</h2>
+                                    <p class="text-gray-200 mb-6 text-sm md:text-base max-w-md">Discover the latest innovations in technology with deals you won't find anywhere else.</p>
+                                    <div class="flex flex-wrap gap-4">
+                                        <a href="#" class="inline-block bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-full transition">Shop Now</a>
+                                        <a href="#" class="inline-block bg-white hover:bg-gray-100 text-neutral-dark font-medium py-3 px-6 rounded-full transition">Learn More</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 2 -->
+                    <div class="banner-slide absolute inset-0 opacity-0 transition-opacity duration-700">
+                        <div class="relative w-full h-full">
+                            <img src="https://images.unsplash.com/photo-1593121925328-369cc8459c08?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80" alt="Smart Home Devices" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-8 md:p-16">
+                                <div class="max-w-lg">
+                                    <span class="inline-block text-white mb-3 text-sm md:text-base font-medium bg-secondary px-4 py-1 rounded-full">Smart Home</span>
+                                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Transform Your Home</h2>
+                                    <p class="text-gray-200 mb-6 text-sm md:text-base max-w-md">Make your home smarter with the latest connected devices and appliances.</p>
+                                    <div class="flex flex-wrap gap-4">
+                                        <a href="#" class="inline-block bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-6 rounded-full transition">Shop Collection</a>
+                                        <a href="#" class="inline-block bg-white hover:bg-gray-100 text-neutral-dark font-medium py-3 px-6 rounded-full transition">View Deals</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 3 -->
+                    <div class="banner-slide absolute inset-0 opacity-0 transition-opacity duration-700">
+                        <div class="relative w-full h-full">
+                            <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80" alt="Fashion Collection" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-8 md:p-16">
+                                <div class="max-w-lg">
+                                    <span class="inline-block text-white mb-3 text-sm md:text-base font-medium bg-primary px-4 py-1 rounded-full">Trending Now</span>
+                                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Summer Fashion Sale</h2>
+                                    <p class="text-gray-200 mb-6 text-sm md:text-base max-w-md">Up to 50% off on the latest summer styles. Limited time offer.</p>
+                                    <div class="flex flex-wrap gap-4">
+                                        <a href="#" class="inline-block bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-full transition">Shop Sale</a>
+                                        <a href="#" class="inline-block bg-white hover:bg-gray-100 text-neutral-dark font-medium py-3 px-6 rounded-full transition">See Collection</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Banner Controls -->
+                <div class="absolute bottom-5 left-0 right-0 flex justify-center space-x-3 z-10">
+                    <button class="w-3 h-3 rounded-full bg-white/50 banner-dot active" data-index="0"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 banner-dot" data-index="1"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 banner-dot" data-index="2"></button>
+                </div>
+                
+                <!-- Prev/Next Buttons -->
+                <button class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center text-white z-10 transition hidden md:flex" id="banner-prev">
+                    <i class="ri-arrow-left-s-line text-xl"></i>
+                </button>
+                <button class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center text-white z-10 transition hidden md:flex" id="banner-next">
+                    <i class="ri-arrow-right-s-line text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Category Quick Access -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-8">
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                        <i class="ri-smartphone-line text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">Electronics</h3>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
+                        <i class="ri-t-shirt-line text-xl text-secondary"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">Fashion</h3>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+                        <i class="ri-home-line text-xl text-accent"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">Home</h3>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center mb-3">
+                        <i class="ri-gamepad-line text-xl text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">Gaming</h3>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mb-3">
+                        <i class="ri-heart-pulse-line text-xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">Health</h3>
+                </a>
+                <a href="#" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col items-center justify-center text-center">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mb-3">
+                        <i class="ri-more-line text-xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-sm font-medium">More</h3>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Deals Section -->
+    <section class="py-10 content-hidden" id="flash-deals-section">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <i class="ri-flashlight-line text-2xl text-accent"></i>
+                    <h2 class="text-2xl font-bold">Flash Deals</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden md:flex items-center gap-1">
+                        <span class="text-gray-500">Ends in:</span>
+                        <div class="bg-neutral-dark text-white px-2 py-1 rounded">12</div>
+                        <span>:</span>
+                        <div class="bg-neutral-dark text-white px-2 py-1 rounded">45</div>
+                        <span>:</span>
+                        <div class="bg-neutral-dark text-white px-2 py-1 rounded">30</div>
+                    </div>
+                    <a href="#" class="text-primary hover:underline font-medium">View All</a>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                {% for product in products %}
+                <!-- Product Card -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group">
+                    <div class="relative">
+                        {% if product.product_price < 100 %}
+                        <span class="absolute top-2 left-2 bg-accent text-white text-xs font-medium px-2 py-1 rounded">-20%</span>
+                        {% endif %}
+                        {% if product.product_quantity < 10 %}
+                        <span class="absolute top-2 right-2 bg-neutral-dark text-white text-xs font-medium px-2 py-1 rounded">Hot</span>
+                        {% endif %}
+                        {% if product.product_image %}
+                        <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="w-full h-48 object-cover">
+                        {% else %}
+                        <img src="https://via.placeholder.com/800x800" alt="{{ product.product_name }}" class="w-full h-48 object-cover">
+                        {% endif %}
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition mb-2">
+                                <i class="ri-heart-line"></i>
+                            </button>
+                            <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-xs text-gray-500 mb-1">{{ product.product_category }}</div>
+                        <h3 class="font-medium mb-1 text-sm md:text-base line-clamp-2">{{ product.product_name }}</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400 text-xs">
+                                <i class="ri-star-fill"></i>
+                                <i class="ri-star-fill"></i>
+                                <i class="ri-star-fill"></i>
+                                <i class="ri-star-fill"></i>
+                                <i class="ri-star-half-fill"></i>
+                            </div>
+                            <span class="text-xs text-gray-500 ml-1">({{ product.product_quantity }})</span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-accent font-bold">NRS{{ product.product_price }}</span>
+                            <span class="text-gray-500 text-sm line-through">${{ product.product_price|add:10 }}</span>
+                        </div>
+                        <button class="w-full mt-3 bg-primary hover:bg-primary/90 text-white py-2 rounded-lg transition flex items-center justify-center gap-1">
+                            <i class="ri-shopping-cart-line"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+ <!-- Featured Categories -->
+ <section class="py-10 bg-gray-50 content-hidden" id="featured-categories-section">
+     <div class="container mx-auto px-4">
+         <h2 class="text-2xl font-bold mb-6">Featured Categories</h2>
+         
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <!-- Category 1 -->
+             <div class="relative rounded-xl overflow-hidden shadow-md h-64 group">
+                 <img src="https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Electronics" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+                     <h3 class="text-xl font-bold text-white mb-2">Electronics & Gadgets</h3>
+                     <p class="text-gray-200 text-sm mb-3">Latest tech innovations at amazing prices</p>
+                     <a href="#" class="inline-flex items-center text-white font-medium hover:text-primary transition">
+                         <span>Shop Now</span>
+                         <i class="ri-arrow-right-line ml-1"></i>
+                     </a>
+                 </div>
+             </div>
+             
+             <!-- Category 2 -->
+             <div class="relative rounded-xl overflow-hidden shadow-md h-64 group">
+                 <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fashion" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+                     <h3 class="text-xl font-bold text-white mb-2">Fashion & Apparel</h3>
+                     <p class="text-gray-200 text-sm mb-3">Trendy styles for every occasion</p>
+                     <a href="#" class="inline-flex items-center text-white font-medium hover:text-primary transition">
+                         <span>Shop Now</span>
+                         <i class="ri-arrow-right-line ml-1"></i>
+                     </a>
+                 </div>
+             </div>
+             
+             <!-- Category 3 -->
+             <div class="relative rounded-xl overflow-hidden shadow-md h-64 group">
+                 <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Home & Kitchen" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+                     <h3 class="text-xl font-bold text-white mb-2">Home & Kitchen</h3>
+                     <p class="text-gray-200 text-sm mb-3">Make your space beautiful and functional</p>
+                     <a href="#" class="inline-flex items-center text-white font-medium hover:text-primary transition">
+                         <span>Shop Now</span>
+                         <i class="ri-arrow-right-line ml-1"></i>
+                     </a>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </section>
+
+ <!-- New Arrivals -->
+ <section class="py-10 content-hidden" id="new-arrivals-section">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold">New Arrivals</h2>
+            <a href="#" class="text-primary hover:underline font-medium">View All</a>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+            {% for product in products|dictsortreversed:"product_id"|slice:":6" %}
+            <!-- Product Card -->
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group">
+                <div class="relative">
+                    <span class="absolute top-2 left-2 bg-secondary text-white text-xs font-medium px-2 py-1 rounded">New</span>
+                    {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="w-full h-40 object-cover">
+                    {% else %}
+                    <img src="https://via.placeholder.com/800x800" alt="{{ product.product_name }}" class="w-full h-40 object-cover">
+                    {% endif %}
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition">
+                            <i class="ri-heart-line"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="text-xs text-gray-500 mb-1">Electronics</div>
+                    <h3 class="font-medium mb-1 text-sm line-clamp-2">{{ product.product_name }}</h3>
+                    <div class="flex items-center mb-1">
+                        <div class="flex text-yellow-400 text-xs">
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-fill"></i>
+                            <i class="ri-star-{% if forloop.counter|divisibleby:2 %}half-fill{% else %}line{% endif %}"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-accent font-bold text-sm">${{ product.product_price }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+ 
+
+ <!-- Footer -->
+ <footer class="bg-neutral-dark py-12 content-hidden" id="footer-section">
+     <div class="container mx-auto px-4">
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             <!-- Company Info -->
+             <div>
+                 <div class="flex items-center space-x-2 mb-6">
+                     <img src="{% static 'Logo/Logo.png' %}" alt="XenoCart Logo" class="h-10 w-10">
+                     <h1 class="text-2xl font-bold text-white">XenoCart</h1>
+                 </div>
+                 <p class="text-gray-400 mb-6">Your one-stop shop for all your needs. Quality products, fast delivery, and excellent customer service.</p>
+                 <div class="flex space-x-4">
+                     <a href="#" class="text-gray-400 hover:text-white transition">
+                         <i class="ri-facebook-fill text-xl"></i>
+                     </a>
+                     <a href="#" class="text-gray-400 hover:text-white transition">
+                         <i class="ri-twitter-fill text-xl"></i>
+                     </a>
+                     <a href="#" class="text-gray-400 hover:text-white transition">
+                         <i class="ri-instagram-fill text-xl"></i>
+                     </a>
+                     <a href="#" class="text-gray-400 hover:text-white transition">
+                         <i class="ri-youtube-fill text-xl"></i>
+                     </a>
+                 </div>
+             </div>
+             
+             <!-- Quick Links -->
+             <div>
+                 <h3 class="text-white text-lg font-medium mb-4">Quick Links</h3>
+                 <ul class="space-y-2">
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Home</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Shop</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Categories</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">New Arrivals</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Deals</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Contact Us</a></li>
+                 </ul>
+             </div>
+             
+             <!-- Customer Service -->
+             <div>
+                 <h3 class="text-white text-lg font-medium mb-4">Customer Service</h3>
+                 <ul class="space-y-2">
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">My Account</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Track Order</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Shipping Policy</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Returns & Refunds</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                     <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
+                 </ul>
+             </div>
+             
+             <!-- Contact Info -->
+             <div>
+                 <h3 class="text-white text-lg font-medium mb-4">Contact Info</h3>
+                 <ul class="space-y-4">
+                     <li class="flex items-start">
+                         <i class="ri-map-pin-line text-primary mt-1 mr-2"></i>
+                         <span class="text-gray-400">123 Commerce Street, Shopping District, NY 10001</span>
+                     </li>
+                     <li class="flex items-center">
+                         <i class="ri-phone-line text-primary mr-2"></i>
+                         <span class="text-gray-400">+1 (800) XENOCART</span>
+                     </li>
+                     <li class="flex items-center">
+                         <i class="ri-mail-line text-primary mr-2"></i>
+                         <span class="text-gray-400">support@xenocart.com</span>
+                     </li>
+                     <li class="flex items-center">
+                         <i class="ri-time-line text-primary mr-2"></i>
+                         <span class="text-gray-400">24/7 Customer Support</span>
+                     </li>
+                 </ul>
+             </div>
+         </div>
+         
+         <div class="border-t border-gray-700 mt-12 pt-8">
+             <div class="flex flex-col md:flex-row justify-between items-center">
+                 <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2025 XenoCart. All rights reserved.</p>
+                 <div class="flex items-center space-x-4">
+                     <img src="https://via.placeholder.com/40x25?text=Visa" alt="Visa" class="h-6">
+                     <img src="https://via.placeholder.com/40x25?text=MC" alt="MasterCard" class="h-6">
+                     <img src="https://via.placeholder.com/40x25?text=Amex" alt="American Express" class="h-6">
+                     <img src="https://via.placeholder.com/40x25?text=PayPal" alt="PayPal" class="h-6">
+                     <img src="https://via.placeholder.com/40x25?text=Apple" alt="Apple Pay" class="h-6">
+                 </div>
+             </div>
+         </div>
+     </div>
+ </footer>
+
+ <!-- Back to Top Button -->
+ <button id="back-to-top" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg opacity-0 invisible transition-all z-50">
+     <i class="ri-arrow-up-line text-xl"></i>
+ </button>
+
+ <!-- Mobile Shopping Cart -->
+ <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg md:hidden z-40 py-2 px-4">
+     <div class="flex justify-between items-center">
+         <button class="flex flex-col items-center text-xs">
+             <i class="ri-home-line text-xl mb-1"></i>
+             <span>Home</span>
+         </button>
+         <button class="flex flex-col items-center text-xs">
+             <i class="ri-search-line text-xl mb-1"></i>
+             <span>Search</span>
+         </button>
+         <button class="flex flex-col items-center text-xs">
+             <div class="relative">
+                 <i class="ri-shopping-cart-line text-xl mb-1"></i>
+                 <span class="absolute -top-1 -right-1 bg-accent text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+             </div>
+             <span>Cart</span>
+         </button>
+         <button class="flex flex-col items-center text-xs">
+             <i class="ri-user-line text-xl mb-1"></i>
+             <span>Account</span>
+         </button>
+     </div>
+ </div>
+
+ <!-- Scripts -->
+ <script>
+     // Preloader
+     document.addEventListener('DOMContentLoaded', function() {
+         const preloader = document.getElementById('preloader');
+         const preloaderBar = document.getElementById('preloader-bar');
+         const sections = document.querySelectorAll('.content-hidden');
+         
+         // Animate the preloader bar
+         let width = 0;
+         const interval = setInterval(function() {
+             if (width >= 100) {
+                 clearInterval(interval);
+                 
+                 // Hide preloader
+                 setTimeout(() => {
+                     preloader.style.opacity = '0';
+                     setTimeout(() => {
+                         preloader.style.display = 'none';
+                         
+                         // Animate sections
+                         sections.forEach((section, index) => {
+                             setTimeout(() => {
+                                 section.classList.add('anim-fade-in-down');
+                                 section.classList.remove('content-hidden');
+                             }, 100 * index);
+                         });
+                     }, 300);
+                 }, 500);
+             } else {
+                 width += 5;
+                 preloaderBar.style.width = width + '%';
+             }
+         }, 50);
+     });
+     
+     // Mobile Menu Toggle
+     const mobileMenuButton = document.getElementById('mobile-menu-button');
+     const closeMobileMenu = document.getElementById('close-mobile-menu');
+     const mobileMenu = document.getElementById('mobile-menu');
+     
+     if (mobileMenuButton && mobileMenu && closeMobileMenu) {
+         mobileMenuButton.addEventListener('click', () => {
+             mobileMenu.style.transform = 'translateX(0)';
+         });
+         
+         closeMobileMenu.addEventListener('click', () => {
+             mobileMenu.style.transform = 'translateX(100%)';
+         });
+     }
+     
+     // Banner Slider
+     const bannerSlides = document.querySelectorAll('.banner-slide');
+     const bannerDots = document.querySelectorAll('.banner-dot');
+     const bannerPrev = document.getElementById('banner-prev');
+     const bannerNext = document.getElementById('banner-next');
+     let currentSlide = 0;
+     let slideInterval;
+     
+     function showSlide(index) {
+         // Hide all slides
+         bannerSlides.forEach(slide => {
+             slide.style.opacity = '0';
+         });
+         
+         // Remove active class from all dots
+         bannerDots.forEach(dot => {
+             dot.classList.remove('active');
+             dot.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+         });
+         
+         // Show the current slide
+         bannerSlides[index].style.opacity = '1';
+         
+         // Add active class to current dot
+         bannerDots[index].classList.add('active');
+         bannerDots[index].style.backgroundColor = 'white';
+         
+         currentSlide = index;
+     }
+     
+     function nextSlide() {
+         let nextIndex = currentSlide + 1;
+         if (nextIndex >= bannerSlides.length) {
+             nextIndex = 0;
+         }
+         showSlide(nextIndex);
+     }
+     
+     function prevSlide() {
+         let prevIndex = currentSlide - 1;
+         if (prevIndex < 0) {
+             prevIndex = bannerSlides.length - 1;
+         }
+         showSlide(prevIndex);
+     }
+     
+     // Initialize slider
+     if (bannerSlides.length > 0) {
+         // Add click event to dots
+         bannerDots.forEach((dot, index) => {
+             dot.addEventListener('click', () => {
+                 showSlide(index);
+                 clearInterval(slideInterval);
+                 startSlideInterval();
+             });
+         });
+         
+         // Add click event to prev/next buttons
+         if (bannerPrev && bannerNext) {
+             bannerPrev.addEventListener('click', () => {
+                 prevSlide();
+                 clearInterval(slideInterval);
+                 startSlideInterval();
+             });
+             
+             bannerNext.addEventListener('click', () => {
+                 nextSlide();
+                 clearInterval(slideInterval);
+                 startSlideInterval();
+             });
+         }
+         
+         // Start automatic slideshow
+         function startSlideInterval() {
+             slideInterval = setInterval(nextSlide, 5000);
+         }
+         
+         startSlideInterval();
+     }
+     
+     // Back to Top Button
+     const backToTopButton = document.getElementById('back-to-top');
+     
+     if (backToTopButton) {
+         window.addEventListener('scroll', () => {
+             if (window.scrollY > 300) {
+                 backToTopButton.classList.remove('opacity-0', 'invisible');
+                 backToTopButton.classList.add('opacity-100', 'visible');
+             } else {
+                 backToTopButton.classList.remove('opacity-100', 'visible');
+                 backToTopButton.classList.add('opacity-0', 'invisible');
+             }
+         });
+         
+         backToTopButton.addEventListener('click', () => {
+             window.scrollTo({
+                 top: 0,
+                 behavior: 'smooth'
+             });
+         });
+     }
+     
+     // Mobile Category Dropdown Toggle
+     const categoryToggle = document.querySelector('#mobile-menu .flex.justify-between');
+     const categorySubmenu = document.querySelector('#mobile-menu ul.pl-4');
+     
+     if (categoryToggle && categorySubmenu) {
+         categoryToggle.addEventListener('click', () => {
+             categorySubmenu.classList.toggle('hidden');
+             categoryToggle.querySelector('i').classList.toggle('ri-arrow-down-s-line');
+             categoryToggle.querySelector('i').classList.toggle('ri-arrow-up-s-line');
+         });
+     }
+ </script>
+</body>
+</html>
